@@ -1,4 +1,5 @@
 const List = require("../models/listModel");
+const ApiFeatures = require("../utils/apifeatures");
 
 // create table data
 
@@ -12,11 +13,19 @@ exports.createRow = async (req,res,next)=>{
     })
 }
 
+// get table data
+
 exports.getList = async (req,res)=>{
-    
-    const rows = await List.find();
+    const apiFeature = new ApiFeatures(List.find(), req.query).search()
+    const rows = await apiFeature.query;
    res.status(200).json({
     success:true,
     rows
     })
 }
+
+
+
+
+
+
