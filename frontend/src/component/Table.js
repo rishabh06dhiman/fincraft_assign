@@ -1,7 +1,6 @@
 import React, { Fragment, useEffect, useState } from "react";
 import "./Table.css";
 import axios from "axios";
-// import ace from "../images/ace.svg";
 import ace from "../images/accending.svg";
 import dec from "../images/decending.svg";
 
@@ -10,8 +9,15 @@ const API_BASE_URL = "http://localhost:5000";
 const Table = () => {
   const [rows, setRows] = useState([]);
   const [searchText, setSearchText] = useState("");
-  //   const [sortedColumn, setSortedColumn] = useState(null);
   const [sortOrder, setSortOrder] = useState("ASC");
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const rowPerPage = 10;
+  const lastIndex = currentPage * rowPerPage;
+  const firstIndex = lastIndex - rowPerPage;
+  const records = rows.slice(firstIndex, lastIndex);
+  const pageCounts = Math.ceil(rows.length / rowPerPage);
+  const numbers = [...Array(pageCounts + 1).keys()].slice(1);
 
   useEffect(() => {
     fetchData();
@@ -56,8 +62,23 @@ const Table = () => {
     }
   };
 
+  const prev_page = () => {
+    if (currentPage !== 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const cur_page = (n) => {
+    setCurrentPage(n);
+  };
+
+  const next_page = () => {
+    if (currentPage !== pageCounts) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
+
   return (
-    // <div>Table</div>
     <Fragment>
       {/* search bar and number of enteries   */}
 
@@ -199,35 +220,46 @@ const Table = () => {
             </tr>
           </thead>
           <tbody>
-            {rows.map((item) => (
-              <tr key={item.id}>
-                <td>{item.name}</td>
-                <td>{item.position}</td>
-                <td>{item.office}</td>
-                <td>{item.age}</td>
-                <td>{item.startdate.substring(0, 10)}</td>
-                <td>${item.salary}</td>
-              </tr>
-            ))}
+            {records &&
+              records.map((item) => (
+                <tr key={item.id}>
+                  <td>{item.name}</td>
+                  <td>{item.position}</td>
+                  <td>{item.office}</td>
+                  <td>{item.age}</td>
+                  <td>{item.startdate.substring(0, 10)}</td>
+                  <td>${item.salary}</td>
+                </tr>
+              ))}
           </tbody>
         </table>
       </div>
 
       {/* pagination */}
       <div className="pagination">
-        <p>Showing 1 to 10 of {rows.length} enteries</p>
-        <div>
-          <a href="#">Previous</a>
-
-          <a class="active" href="#">
-            1
+        <p>
+          Showing {firstIndex + 1} to {firstIndex + records.length} of{" "}
+          {records.length} enteries
+        </p>
+        <div className="pagination-tab">
+          <a href="#" onClick={() => prev_page()}>
+            Previous
           </a>
-          <a href="#">2</a>
-          <a href="#">3</a>
-          <a href="#">4</a>
-          <a href="#">5</a>
-          <a href="#">6</a>
-          <a href="#">Next</a>
+
+          {numbers.map((n, i) => (
+            <li
+              className={`page-item ${currentPage === n ? "active" : ""}`}
+              key={i}
+            >
+              <a href="#" className="page-link" onClick={() => cur_page(n)}>
+                {n}
+              </a>
+            </li>
+          ))}
+
+          <a href="#" onClick={() => next_page()}>
+            Next
+          </a>
         </div>
       </div>
     </Fragment>
